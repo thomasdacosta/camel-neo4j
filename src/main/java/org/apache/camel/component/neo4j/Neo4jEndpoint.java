@@ -29,10 +29,12 @@ import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
 
 public class Neo4jEndpoint extends DefaultEndpoint {
 
-	private boolean				commits		= true;
-	private boolean				rollbacks		= true;
+	private boolean				commits			= true;
+	private boolean				rollbacks			= true;
 
-	public static final String		HEADER_TXTYPE	= "Neo4jTxType";
+	public static final String		HEADER_TXTYPE		= "Neo4jTxType";
+	public static final String		HEADER_NODE_ID		= "Neo4jNodeId";
+	public static final String		HEADER_RELATIONSHIP_ID	= "Neo4jRelationshipId";
 
 	private final GraphDatabaseService	graphDatabase;
 

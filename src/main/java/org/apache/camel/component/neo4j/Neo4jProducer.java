@@ -36,6 +36,8 @@ public abstract class Neo4jProducer extends DefaultProducer {
 		Object body = exchange.getIn().getBody();
 		if (body instanceof Neo4jCreateNodeMessage) {
 			Node node = handle((Neo4jCreateNodeMessage) body);
+			logger.debug("Node created [{}]", node);
+			exchange.getIn().setHeader(Neo4jEndpoint.HEADER_NODE_ID, node.getId());
 
 		} else if (body instanceof Neo4jRemoveNodeMessage) {
 			handle((Neo4jRemoveNodeMessage) body);
@@ -44,7 +46,9 @@ public abstract class Neo4jProducer extends DefaultProducer {
 			handle((Neo4jRemoveRelationshipMessage) body);
 
 		} else if (body instanceof Neo4jCreateRelationshipMessage) {
-			handle((Neo4jCreateRelationshipMessage) body);
+			Relationship r = handle((Neo4jCreateRelationshipMessage) body);
+			logger.debug("Relationship created [{}]", r);
+			exchange.getIn().setHeader(Neo4jEndpoint.HEADER_RELATIONSHIP_ID, r.getId());
 
 		} else {
 			throw new Neo4jException("Unsupported body type for Producer [" + body.getClass().getName() + "]");
