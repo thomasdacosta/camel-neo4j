@@ -9,7 +9,7 @@ import org.neo4j.graphdb.RelationshipType;
  * @author Stephen K Samuel samspade79@gmail.com 31 Jul 2012 11:27:43
  * 
  */
-public interface Neo4jRelationshipCreateMessage {
+public interface Neo4jCreateRelationshipMessage {
 
 	Node getStartNode();
 

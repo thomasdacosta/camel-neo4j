@@ -14,11 +14,11 @@ package org.apache.camel.component.neo4j;
 
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.event.TransactionData;
 import org.neo4j.graphdb.event.TransactionEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
 
 /**
  * @author Stephen K Samuel samspade79@gmail.com 21 May 2012 07:05:49
@@ -27,10 +27,10 @@ import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
 public class Neo4jConsumer extends DefaultConsumer {
 
 	private static final Logger			logger	= LoggerFactory.getLogger(Neo4jConsumer.class);
-	private final SpringRestGraphDatabase	graphDatabase;
+	private final GraphDatabaseService		graphDatabase;
 	private final TransactionEventHandler	handler;
 
-	public Neo4jConsumer(final Neo4jEndpoint endpoint, SpringRestGraphDatabase graphDatabase, Processor processor, final boolean commits,
+	public Neo4jConsumer(final Neo4jEndpoint endpoint, GraphDatabaseService graphDatabase, Processor processor, final boolean commits,
 			final boolean rollbacks) {
 		super(endpoint, processor);
 		this.graphDatabase = graphDatabase;

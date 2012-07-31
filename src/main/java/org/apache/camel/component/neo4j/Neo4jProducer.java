@@ -15,51 +15,47 @@ package org.apache.camel.component.neo4j;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.neo4j.core.GraphDatabase;
 
-public class Neo4jProducer extends DefaultProducer {
+public abstract class Neo4jProducer extends DefaultProducer {
 
 	private static final Logger	logger	= LoggerFactory.getLogger(Neo4jProducer.class);
 
 	private final Neo4jEndpoint	endpoint;
-	private final GraphDatabase	graphDatabase;
 
-	public Neo4jProducer(Neo4jEndpoint endpoint, GraphDatabase graphDatabase) {
+	public Neo4jProducer(Neo4jEndpoint endpoint) {
 		super(endpoint);
-		this.graphDatabase = graphDatabase;
 		this.endpoint = endpoint;
 	}
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		Object body = exchange.getIn().getBody();
-		if (body instanceof Neo4jNodeCreateMessage) {
+		if (body instanceof Neo4jCreateNodeMessage) {
+			Node node = handle((Neo4jCreateNodeMessage) body);
 
-			Neo4jNodeCreateMessage create = (Neo4jNodeCreateMessage) body;
-			graphDatabase.createNode(create.getProps());
+		} else if (body instanceof Neo4jRemoveNodeMessage) {
+			handle((Neo4jRemoveNodeMessage) body);
 
-		} else if (body instanceof Neo4jNodeRemoveMessage) {
+		} else if (body instanceof Neo4jRemoveRelationshipMessage) {
+			handle((Neo4jRemoveRelationshipMessage) body);
 
-			Neo4jNodeRemoveMessage remove = (Neo4jNodeRemoveMessage) body;
-			graphDatabase.remove(remove.getNode());
-
-		} else if (body instanceof Neo4jRelationshipRemoveMessage) {
-
-			Neo4jRelationshipRemoveMessage remove = (Neo4jRelationshipRemoveMessage) body;
-			graphDatabase.remove(remove.getRelationship());
-
-		} else if (body instanceof Neo4jRelationshipCreateMessage) {
-
-			Neo4jRelationshipCreateMessage create = (Neo4jRelationshipCreateMessage) body;
-			graphDatabase.createRelationship(create.getStartNode(),
-					create.getEndNode(),
-					create.getRelationshipType(),
-					create.getProperties());
+		} else if (body instanceof Neo4jCreateRelationshipMessage) {
+			handle((Neo4jCreateRelationshipMessage) body);
 
 		} else {
 			throw new Neo4jException("Unsupported body type for Producer [" + body.getClass().getName() + "]");
 		}
 	}
+
+	protected abstract Relationship handle(Neo4jCreateRelationshipMessage msg);
+
+	protected abstract void handle(Neo4jRemoveRelationshipMessage msg);
+
+	protected abstract void handle(Neo4jRemoveNodeMessage msg);
+
+	protected abstract Node handle(Neo4jCreateNodeMessage msg);
 }

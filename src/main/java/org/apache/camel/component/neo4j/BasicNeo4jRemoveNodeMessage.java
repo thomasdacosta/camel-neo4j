@@ -2,11 +2,11 @@ package org.apache.camel.component.neo4j;
 
 import org.neo4j.graphdb.Node;
 
-public class BasicNeo4jNodeRemoveMessage implements Neo4jNodeRemoveMessage {
+public class BasicNeo4jRemoveNodeMessage implements Neo4jRemoveNodeMessage {
 
 	private final Node	node;
 
-	public BasicNeo4jNodeRemoveMessage(Node node) {
+	public BasicNeo4jRemoveNodeMessage(Node node) {
 		this.node = node;
 	}
 

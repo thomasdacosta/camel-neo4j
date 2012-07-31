@@ -5,7 +5,7 @@ import java.util.Map;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
-public class BasicNeo4jRelationshipCreateMessage implements Neo4jRelationshipCreateMessage {
+public class BasicNeo4jRelationshipCreateMessage implements Neo4jCreateRelationshipMessage {
 
 	private final Map<String, Object>	props;
 	private final RelationshipType	relationshipType;

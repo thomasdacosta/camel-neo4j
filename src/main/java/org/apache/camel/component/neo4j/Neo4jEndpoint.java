@@ -22,17 +22,19 @@ import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.event.TransactionData;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
 
 public class Neo4jEndpoint extends DefaultEndpoint {
 
-	private boolean					commits		= true;
-	private boolean					rollbacks		= true;
+	private boolean				commits		= true;
+	private boolean				rollbacks		= true;
 
-	public static final String			HEADER_TXTYPE	= "Neo4jTxType";
+	public static final String		HEADER_TXTYPE	= "Neo4jTxType";
 
-	private final SpringRestGraphDatabase	graphDatabase;
+	private final GraphDatabaseService	graphDatabase;
 
 	public Neo4jEndpoint(String endpointUri, String remaining, Neo4jComponent component) throws URISyntaxException {
 		super(endpointUri, component);
@@ -56,7 +58,10 @@ public class Neo4jEndpoint extends DefaultEndpoint {
 
 	@Override
 	public Producer createProducer() throws Exception {
-		return new Neo4jProducer(this, graphDatabase);
+		if (graphDatabase instanceof SpringRestGraphDatabase)
+			return new RestNeo4jProducer(this, (SpringRestGraphDatabase) graphDatabase);
+		else
+			return new EmbeddedNeo4jProducer(this, (EmbeddedGraphDatabase) graphDatabase);
 	}
 
 	public Exchange createRollbackExchange(TransactionData data, Object state) {
