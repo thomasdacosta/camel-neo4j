@@ -15,24 +15,15 @@ package org.apache.camel.component.neo4j;
 import java.net.URISyntaxException;
 
 import org.apache.camel.Consumer;
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
-import org.apache.camel.impl.DefaultExchange;
-import org.apache.camel.impl.DefaultMessage;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.event.TransactionData;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
 
 public class Neo4jEndpoint extends DefaultEndpoint {
 
-	private boolean				commits			= true;
-	private boolean				rollbacks			= true;
-
-	public static final String		HEADER_TXTYPE		= "Neo4jTxType";
+	public static final String		HEADER_OPERATION		= "Neo4jOperation";
 	public static final String		HEADER_NODE_ID		= "Neo4jNodeId";
 	public static final String		HEADER_RELATIONSHIP_ID	= "Neo4jRelationshipId";
 
@@ -43,58 +34,19 @@ public class Neo4jEndpoint extends DefaultEndpoint {
 		graphDatabase = new SpringRestGraphDatabase(remaining);
 	}
 
-	public Exchange createCommitExchange(TransactionData data, Object state) {
-		Exchange exchange = new DefaultExchange(getCamelContext(), getExchangePattern());
-
-		Message message = new DefaultMessage();
-		message.setHeader(HEADER_TXTYPE, "COMMIT");
-		message.setBody(data);
-		exchange.setIn(message);
-		return exchange;
-	}
-
 	@Override
 	public Consumer createConsumer(Processor processor) throws Exception {
-		return new Neo4jConsumer(this, graphDatabase, processor, commits, rollbacks);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Producer createProducer() throws Exception {
-		if (graphDatabase instanceof SpringRestGraphDatabase)
-			return new SpringRestNeo4jProducer(this, (SpringRestGraphDatabase) graphDatabase);
-		else
-			return new EmbeddedNeo4jProducer(this, (EmbeddedGraphDatabase) graphDatabase);
-	}
-
-	public Exchange createRollbackExchange(TransactionData data, Object state) {
-		Exchange exchange = new DefaultExchange(getCamelContext(), getExchangePattern());
-
-		Message message = new DefaultMessage();
-		message.setHeader(HEADER_TXTYPE, "ROLLBACK");
-		message.setBody(data);
-		exchange.setIn(message);
-		return exchange;
-	}
-
-	public boolean isCommits() {
-		return commits;
-	}
-
-	public boolean isRollbacks() {
-		return rollbacks;
+		return new Neo4jProducer(this, (SpringRestGraphDatabase) graphDatabase);
 	}
 
 	@Override
 	public boolean isSingleton() {
 		return true;
-	}
-
-	public void setCommits(boolean commits) {
-		this.commits = commits;
-	}
-
-	public void setRollbacks(boolean rollbacks) {
-		this.rollbacks = rollbacks;
 	}
 
 }

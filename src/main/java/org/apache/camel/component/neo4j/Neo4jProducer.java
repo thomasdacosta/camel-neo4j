@@ -13,53 +13,118 @@
 
 package org.apache.camel.component.neo4j;
 
+import java.util.Map;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
+import org.springframework.data.neo4j.support.Neo4jTemplate;
 
-public abstract class Neo4jProducer extends DefaultProducer {
+public class Neo4jProducer extends DefaultProducer {
 
-	private static final Logger	logger	= LoggerFactory.getLogger(Neo4jProducer.class);
+	private static final Logger			logger	= LoggerFactory.getLogger(Neo4jProducer.class);
 
-	private final Neo4jEndpoint	endpoint;
+	private final Neo4jEndpoint			endpoint;
 
-	public Neo4jProducer(Neo4jEndpoint endpoint) {
+	private final SpringRestGraphDatabase	graphDatabase;
+
+	private final Neo4jTemplate			template;
+
+	public Neo4jProducer(Neo4jEndpoint endpoint, SpringRestGraphDatabase graphDatabase) {
 		super(endpoint);
 		this.endpoint = endpoint;
+		this.graphDatabase = graphDatabase;
+		this.template = new Neo4jTemplate(graphDatabase);
 	}
 
-	protected abstract Node handle(Neo4jCreateNodeMessage msg);
+	Node createNode(Object body) {
+		if (body == null)
+			return template.createNode();
+		else if (body instanceof Map)
+			return template.createNode((Map<String, Object>) body);
+		throw new Neo4jException("Unsupported body type for create node [" + body.getClass() + "]");
+	}
 
-	protected abstract Relationship handle(Neo4jCreateRelationshipMessage msg);
+	Relationship createRelationship(Object body) {
 
-	protected abstract void handle(Neo4jRemoveNodeMessage msg);
-
-	protected abstract void handle(Neo4jRemoveRelationshipMessage msg);
+		if (body instanceof SpringDataRelationship) {
+			SpringDataRelationship r = (SpringDataRelationship) body;
+			return template.createRelationshipBetween(r.getStart(),
+					r.getEnd(),
+					r.getRelationshipEntityClass(),
+					r.getRelationshipType(),
+					r.isAllowDuplicates());
+		} else if (body instanceof BasicRelationship) {
+			BasicRelationship r = (BasicRelationship) body;
+			Transaction tx = graphDatabase.beginTx();
+			try {
+				Relationship r2 = graphDatabase.createRelationship(r.getStart(),
+						r.getEnd(),
+						r.getRelationshipType(),
+						r.getProperties());
+				tx.success();
+				return r2;
+			} finally {
+				tx.finish();
+			}
+		}
+		throw new Neo4jException("Unsupported body type for create relationship [" + body == null ? "null" : body.getClass() + "]");
+	}
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		Object body = exchange.getIn().getBody();
-		if (body instanceof Neo4jCreateNodeMessage) {
-			Node node = handle((Neo4jCreateNodeMessage) body);
+		Neo4jOperation op = (Neo4jOperation) exchange.getIn().getHeader(Neo4jEndpoint.HEADER_OPERATION);
+		if (op == null)
+			throw new Neo4jException("No operation specified for exchange " + exchange);
+
+		switch (op) {
+		case CREATE_NODE:
+			Node node = createNode(body);
 			logger.debug("Node created [{}]", node);
 			exchange.getIn().setHeader(Neo4jEndpoint.HEADER_NODE_ID, node.getId());
-
-		} else if (body instanceof Neo4jRemoveNodeMessage) {
-			handle((Neo4jRemoveNodeMessage) body);
-
-		} else if (body instanceof Neo4jRemoveRelationshipMessage) {
-			handle((Neo4jRemoveRelationshipMessage) body);
-
-		} else if (body instanceof Neo4jCreateRelationshipMessage) {
-			Relationship r = handle((Neo4jCreateRelationshipMessage) body);
+			break;
+		case CREATE_RELATIONSHIP:
+			Relationship r = createRelationship(body);
 			logger.debug("Relationship created [{}]", r);
 			exchange.getIn().setHeader(Neo4jEndpoint.HEADER_RELATIONSHIP_ID, r.getId());
-
-		} else {
-			throw new Neo4jException("Unsupported body type for Producer [" + body.getClass().getName() + "]");
+			break;
+		case REMOVE_NODE:
+			removeNode(body);
+			break;
+		case REMOVE_RELATIONSHIP:
+			removeRelationship(body);
+			break;
 		}
+	}
+
+	void removeNode(Object body) {
+		if (body instanceof Number) {
+			logger.debug("Deleting node by id [" + body + "]");
+			Node node = template.getNode(((Number) body).longValue());
+			template.delete(node);
+		} else if (body instanceof Node) {
+			template.delete(body);
+		}
+		throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
+	}
+
+	void removeRelationship(Object body) {
+		if (body instanceof Number) {
+			logger.debug("Deleting relationship by id [" + body + "]");
+			Relationship r = template.getRelationship(((Number) body).longValue());
+			template.delete(r);
+		} else if (body instanceof Relationship) {
+			template.delete(body);
+		} else if (body instanceof SpringDataRelationship) {
+			SpringDataRelationship r = (SpringDataRelationship) body;
+			template.deleteRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType());
+		}
+		throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
 	}
 }

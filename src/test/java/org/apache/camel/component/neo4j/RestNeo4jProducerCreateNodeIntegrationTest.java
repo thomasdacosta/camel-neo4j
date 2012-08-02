@@ -48,6 +48,7 @@ public class RestNeo4jProducerCreateNodeIntegrationTest extends CamelTestSupport
 					@Override
 					public void process(Exchange arg0) throws Exception {
 						Long id = (Long) arg0.getIn().getHeader(Neo4jEndpoint.HEADER_NODE_ID);
+						assertNotNull(id);
 						Node node = db.getNodeById(id);
 						assertNotNull(node);
 					}
@@ -67,7 +68,7 @@ public class RestNeo4jProducerCreateNodeIntegrationTest extends CamelTestSupport
 			@Override
 			public void run() {
 				for (int k = 0; k < messageCount; k++) {
-					template.sendBody(new BasicNeo4jCreateNodeMessage());
+					template.sendBodyAndHeader(null, Neo4jEndpoint.HEADER_OPERATION, Neo4jOperation.CREATE_NODE);
 				}
 			}
 		});

@@ -16,6 +16,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
+import org.springframework.data.neo4j.support.Neo4jTemplate;
 
 /**
  * @author Stephen K Samuel samspade79@gmail.com 29 Jul 2012 18:09:05
@@ -23,21 +24,24 @@ import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
  */
 public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTestSupport {
 
-	private static final Logger			logger		= LoggerFactory
-													.getLogger(RestNeo4jProducerCreateRelationshipIntegrationTest.class);
+	public enum TestRelationships implements RelationshipType {
+		TICKLES
+	}
 
-	private final String				neo4jEndpoint	= "neo4j:http://localhost:7474/db/data/";
+	private static final Logger	logger		= LoggerFactory.getLogger(RestNeo4jProducerCreateRelationshipIntegrationTest.class);
+
+	private final String		neo4jEndpoint	= "neo4j:http://localhost:7474/db/data/";
 
 	@SuppressWarnings("hiding")
 	@Produce(uri = "direct:start")
-	protected ProducerTemplate			template;
+	protected ProducerTemplate	template;
 
-	private CouchDbClient				client;
+	private CouchDbClient		client;
 
-	private final SpringRestGraphDatabase	db			= new SpringRestGraphDatabase("http://localhost:7474/db/data/");
+	private final Neo4jTemplate	neo			= new Neo4jTemplate(new SpringRestGraphDatabase("http://localhost:7474/db/data/"));
 
 	@EndpointInject(uri = "mock:end")
-	private MockEndpoint				end;
+	private MockEndpoint		end;
 
 	@Override
 	protected RouteBuilder createRouteBuilder() throws Exception {
@@ -50,8 +54,10 @@ public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTes
 					@Override
 					public void process(Exchange arg0) throws Exception {
 						Long id = (Long) arg0.getIn().getHeader(Neo4jEndpoint.HEADER_RELATIONSHIP_ID);
-						Relationship r = db.getRelationshipById(id);
+						assertNotNull(id);
+						Relationship r = neo.getRelationship(id);
 						assertNotNull(r);
+						assertEquals(TestRelationships.TICKLES.name(), r.getType().name());
 					}
 				}).to(end);
 			}
@@ -59,27 +65,20 @@ public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTes
 	}
 
 	@Test
-	public void testCreateRelationships() throws InterruptedException {
+	public void testCreateNodes() throws InterruptedException {
 
 		final int messageCount = 100;
-		end.expectedMessageCount(100);
+		end.expectedMessageCount(messageCount);
 
 		Thread t = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				for (int k = 0; k < messageCount; k++) {
-					Node start = db.createNode();
-					assertNotNull(start);
-					Node end = db.createNode();
-					assertNotNull(end);
-					template.sendBody(new BasicNeo4jCreateRelationshipMessage(start, end, new RelationshipType() {
-
-						@Override
-						public String name() {
-							return "tickles";
-						}
-					}));
+					Node start = neo.createNode();
+					Node end = neo.createNode();
+					BasicRelationship r = new BasicRelationship(start, end, TestRelationships.TICKLES);
+					template.sendBodyAndHeader(r, Neo4jEndpoint.HEADER_OPERATION, Neo4jOperation.CREATE_RELATIONSHIP);
 				}
 			}
 		});
@@ -87,5 +86,4 @@ public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTes
 		t.join();
 		end.assertIsSatisfied();
 	}
-
 }
