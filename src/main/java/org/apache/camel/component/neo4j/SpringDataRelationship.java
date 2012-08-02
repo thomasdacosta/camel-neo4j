@@ -1,6 +1,5 @@
 package org.apache.camel.component.neo4j;
 
-
 /**
  * @author Stephen K Samuel samspade79@gmail.com 3 Aug 2012 00:06:35
  * 
@@ -12,6 +11,18 @@ public class SpringDataRelationship {
 	private Class	relationshipEntityClass;
 	private String	relationshipType;
 	private boolean	allowDuplicates;
+
+	public SpringDataRelationship() {
+	}
+
+	public SpringDataRelationship(Object start, Object end, Class relationshipEntityClass, String relationshipType,
+			boolean allowDuplicates) {
+		this.start = start;
+		this.end = end;
+		this.relationshipEntityClass = relationshipEntityClass;
+		this.relationshipType = relationshipType;
+		this.allowDuplicates = allowDuplicates;
+	}
 
 	public Object getEnd() {
 		return end;

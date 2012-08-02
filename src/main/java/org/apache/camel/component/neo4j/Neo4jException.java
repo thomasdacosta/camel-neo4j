@@ -22,8 +22,4 @@ public class Neo4jException extends RuntimeException {
 		super(message);
 	}
 
-	public Neo4jException(Throwable cause) {
-		super(cause);
-	}
-
 }

@@ -41,6 +41,13 @@ public class Neo4jProducer extends DefaultProducer {
 		this.template = new Neo4jTemplate(graphDatabase);
 	}
 
+	public Neo4jProducer(Neo4jEndpoint endpoint, GraphDatabase graphDatabase, Neo4jTemplate template) {
+		super(endpoint);
+		this.endpoint = endpoint;
+		this.graphDatabase = graphDatabase;
+		this.template = template;
+	}
+
 	Node createNode(Object body) {
 		if (body == null)
 			return template.createNode();
