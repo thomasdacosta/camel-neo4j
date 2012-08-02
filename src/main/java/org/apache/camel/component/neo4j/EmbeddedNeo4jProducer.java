@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 /**
@@ -19,33 +20,60 @@ public class EmbeddedNeo4jProducer extends Neo4jProducer {
 		this.graphDatabase = graphDatabase;
 	}
 
+	public EmbeddedGraphDatabase getGraphDatabase() {
+		return graphDatabase;
+	}
+
 	@Override
 	protected Node handle(Neo4jCreateNodeMessage msg) {
-		Neo4jCreateNodeMessage create = msg;
-		Node node = graphDatabase.createNode();
-		for (Map.Entry<String, Object> entry : create.getProps().entrySet()) {
-			node.setProperty(entry.getKey(), entry.getValue());
+		Transaction tx = graphDatabase.beginTx();
+		try {
+			Node node = graphDatabase.createNode();
+			for (Map.Entry<String, Object> entry : msg.getProps().entrySet()) {
+				node.setProperty(entry.getKey(), entry.getValue());
+			}
+			tx.success();
+			return node;
+		} finally {
+			tx.finish();
 		}
-		return node;
 	}
 
 	@Override
 	protected Relationship handle(Neo4jCreateRelationshipMessage msg) {
-		Node start = graphDatabase.getNodeById(msg.getStartNode().getId());
-		Relationship relationship = start.createRelationshipTo(msg.getEndNode(), msg.getRelationshipType());
-		for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
-			relationship.setProperty(entry.getKey(), entry.getValue());
+		Transaction tx = graphDatabase.beginTx();
+		try {
+			Node start = graphDatabase.getNodeById(msg.getStartNode().getId());
+			Relationship relationship = start.createRelationshipTo(msg.getEndNode(), msg.getRelationshipType());
+			for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
+				relationship.setProperty(entry.getKey(), entry.getValue());
+			}
+			tx.success();
+			return relationship;
+		} finally {
+			tx.finish();
 		}
-		return relationship;
-	}
-
-	@Override
-	protected void handle(Neo4jRemoveRelationshipMessage msg) {
-		graphDatabase.getRelationshipById(msg.getRelationship().getId()).delete();
 	}
 
 	@Override
 	protected void handle(Neo4jRemoveNodeMessage msg) {
-		graphDatabase.getNodeById(msg.getNode().getId()).delete();
+		Transaction tx = graphDatabase.beginTx();
+		try {
+			graphDatabase.getNodeById(msg.getNode().getId()).delete();
+			tx.success();
+		} finally {
+			tx.finish();
+		}
+	}
+
+	@Override
+	protected void handle(Neo4jRemoveRelationshipMessage msg) {
+		Transaction tx = graphDatabase.beginTx();
+		try {
+			graphDatabase.getRelationshipById(msg.getRelationship().getId()).delete();
+			tx.success();
+		} finally {
+			tx.finish();
+		}
 	}
 }

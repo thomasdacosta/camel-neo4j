@@ -61,7 +61,7 @@ public class Neo4jEndpoint extends DefaultEndpoint {
 	@Override
 	public Producer createProducer() throws Exception {
 		if (graphDatabase instanceof SpringRestGraphDatabase)
-			return new RestNeo4jProducer(this, (SpringRestGraphDatabase) graphDatabase);
+			return new SpringRestNeo4jProducer(this, (SpringRestGraphDatabase) graphDatabase);
 		else
 			return new EmbeddedNeo4jProducer(this, (EmbeddedGraphDatabase) graphDatabase);
 	}

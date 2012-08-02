@@ -8,11 +8,11 @@ import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
  * @author Stephen K Samuel samspade79@gmail.com 31 Jul 2012 12:04:25
  * 
  */
-public class RestNeo4jProducer extends Neo4jProducer {
+public class SpringRestNeo4jProducer extends Neo4jProducer {
 
 	private final SpringRestGraphDatabase	graphDatabase;
 
-	public RestNeo4jProducer(Neo4jEndpoint endpoint, SpringRestGraphDatabase graphDatabase) {
+	public SpringRestNeo4jProducer(Neo4jEndpoint endpoint, SpringRestGraphDatabase graphDatabase) {
 		super(endpoint);
 		this.graphDatabase = graphDatabase;
 	}

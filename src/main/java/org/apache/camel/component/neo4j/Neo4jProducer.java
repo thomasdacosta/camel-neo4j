@@ -31,6 +31,14 @@ public abstract class Neo4jProducer extends DefaultProducer {
 		this.endpoint = endpoint;
 	}
 
+	protected abstract Node handle(Neo4jCreateNodeMessage msg);
+
+	protected abstract Relationship handle(Neo4jCreateRelationshipMessage msg);
+
+	protected abstract void handle(Neo4jRemoveNodeMessage msg);
+
+	protected abstract void handle(Neo4jRemoveRelationshipMessage msg);
+
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		Object body = exchange.getIn().getBody();
@@ -54,12 +62,4 @@ public abstract class Neo4jProducer extends DefaultProducer {
 			throw new Neo4jException("Unsupported body type for Producer [" + body.getClass().getName() + "]");
 		}
 	}
-
-	protected abstract Relationship handle(Neo4jCreateRelationshipMessage msg);
-
-	protected abstract void handle(Neo4jRemoveRelationshipMessage msg);
-
-	protected abstract void handle(Neo4jRemoveNodeMessage msg);
-
-	protected abstract Node handle(Neo4jCreateNodeMessage msg);
 }
