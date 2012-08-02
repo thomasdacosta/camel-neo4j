@@ -3,7 +3,6 @@ package org.apache.camel.component.neo4j;
 import java.util.Map;
 
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 
 /**
  * @author Stephen K Samuel samspade79@gmail.com 3 Aug 2012 00:13:53
@@ -13,19 +12,19 @@ public class BasicRelationship {
 
 	private Node			start;
 	private Node			end;
-	private RelationshipType	relationshipType;
+	private String			relationshipType;
 	private Map<String, Object>	properties;
 
 	public BasicRelationship() {
 	}
 
-	public BasicRelationship(Node start, Node end, RelationshipType relationshipType) {
+	public BasicRelationship(Node start, Node end, String relationshipType) {
 		this.start = start;
 		this.end = end;
 		this.relationshipType = relationshipType;
 	}
 
-	public BasicRelationship(Node start, Node end, RelationshipType relationshipType, Map<String, Object> properties) {
+	public BasicRelationship(Node start, Node end, String relationshipType, Map<String, Object> properties) {
 		this.start = start;
 		this.end = end;
 		this.relationshipType = relationshipType;
@@ -40,7 +39,7 @@ public class BasicRelationship {
 		return properties;
 	}
 
-	public RelationshipType getRelationshipType() {
+	public String getRelationshipType() {
 		return relationshipType;
 	}
 
@@ -56,7 +55,7 @@ public class BasicRelationship {
 		this.properties = properties;
 	}
 
-	public void setRelationshipType(RelationshipType relationshipType) {
+	public void setRelationshipType(String relationshipType) {
 		this.relationshipType = relationshipType;
 	}
 

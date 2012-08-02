@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.lightcouch.CouchDbClient;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
@@ -23,10 +22,6 @@ import org.springframework.data.neo4j.support.Neo4jTemplate;
  * 
  */
 public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTestSupport {
-
-	public enum TestRelationships implements RelationshipType {
-		TICKLES
-	}
 
 	private static final Logger	logger		= LoggerFactory.getLogger(RestNeo4jProducerCreateRelationshipIntegrationTest.class);
 
@@ -57,7 +52,7 @@ public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTes
 						assertNotNull(id);
 						Relationship r = neo.getRelationship(id);
 						assertNotNull(r);
-						assertEquals(TestRelationships.TICKLES.name(), r.getType().name());
+						assertEquals("tickles", r.getType().name());
 					}
 				}).to(end);
 			}
@@ -77,7 +72,7 @@ public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTes
 				for (int k = 0; k < messageCount; k++) {
 					Node start = neo.createNode();
 					Node end = neo.createNode();
-					BasicRelationship r = new BasicRelationship(start, end, TestRelationships.TICKLES);
+					BasicRelationship r = new BasicRelationship(start, end, "tickles");
 					template.sendBodyAndHeader(r, Neo4jEndpoint.HEADER_OPERATION, Neo4jOperation.CREATE_RELATIONSHIP);
 				}
 			}

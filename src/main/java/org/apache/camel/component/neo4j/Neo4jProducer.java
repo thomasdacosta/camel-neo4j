@@ -19,23 +19,22 @@ import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
+import org.springframework.data.neo4j.core.GraphDatabase;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 
 public class Neo4jProducer extends DefaultProducer {
 
-	private static final Logger			logger	= LoggerFactory.getLogger(Neo4jProducer.class);
+	private static final Logger	logger	= LoggerFactory.getLogger(Neo4jProducer.class);
 
-	private final Neo4jEndpoint			endpoint;
+	private final Neo4jEndpoint	endpoint;
 
-	private final SpringRestGraphDatabase	graphDatabase;
+	private final GraphDatabase	graphDatabase;
 
-	private final Neo4jTemplate			template;
+	private final Neo4jTemplate	template;
 
-	public Neo4jProducer(Neo4jEndpoint endpoint, SpringRestGraphDatabase graphDatabase) {
+	public Neo4jProducer(Neo4jEndpoint endpoint, GraphDatabase graphDatabase) {
 		super(endpoint);
 		this.endpoint = endpoint;
 		this.graphDatabase = graphDatabase;
@@ -61,17 +60,8 @@ public class Neo4jProducer extends DefaultProducer {
 					r.isAllowDuplicates());
 		} else if (body instanceof BasicRelationship) {
 			BasicRelationship r = (BasicRelationship) body;
-			Transaction tx = graphDatabase.beginTx();
-			try {
-				Relationship r2 = graphDatabase.createRelationship(r.getStart(),
-						r.getEnd(),
-						r.getRelationshipType(),
-						r.getProperties());
-				tx.success();
-				return r2;
-			} finally {
-				tx.finish();
-			}
+			return template.createRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType(), r.getProperties());
+
 		}
 		throw new Neo4jException("Unsupported body type for create relationship [" + body == null ? "null" : body.getClass() + "]");
 	}
