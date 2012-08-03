@@ -9,7 +9,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
-import org.lightcouch.CouchDbClient;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
@@ -30,8 +29,6 @@ public class RestNeo4jProducerCreateRelationshipIntegrationTest extends CamelTes
 	@SuppressWarnings("hiding")
 	@Produce(uri = "direct:start")
 	protected ProducerTemplate	template;
-
-	private CouchDbClient		client;
 
 	private final Neo4jTemplate	neo			= new Neo4jTemplate(new SpringRestGraphDatabase("http://localhost:7474/db/data/"));
 
