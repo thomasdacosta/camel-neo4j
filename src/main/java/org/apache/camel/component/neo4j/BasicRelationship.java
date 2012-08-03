@@ -10,18 +10,13 @@ import org.neo4j.graphdb.Node;
  */
 public class BasicRelationship {
 
-	private Node			start;
-	private Node			end;
-	private String			relationshipType;
-	private Map<String, Object>	properties;
-
-	public BasicRelationship() {
-	}
+	private final Node			start;
+	private final Node			end;
+	private final String			relationshipType;
+	private final Map<String, Object>	properties;
 
 	public BasicRelationship(Node start, Node end, String relationshipType) {
-		this.start = start;
-		this.end = end;
-		this.relationshipType = relationshipType;
+		this(start, end, relationshipType, null);
 	}
 
 	public BasicRelationship(Node start, Node end, String relationshipType, Map<String, Object> properties) {
@@ -45,21 +40,5 @@ public class BasicRelationship {
 
 	public Node getStart() {
 		return start;
-	}
-
-	public void setEnd(Node end) {
-		this.end = end;
-	}
-
-	public void setProperties(Map<String, Object> properties) {
-		this.properties = properties;
-	}
-
-	public void setRelationshipType(String relationshipType) {
-		this.relationshipType = relationshipType;
-	}
-
-	public void setStart(Node start) {
-		this.start = start;
 	}
 }

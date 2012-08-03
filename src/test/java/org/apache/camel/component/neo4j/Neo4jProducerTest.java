@@ -133,4 +133,100 @@ public class Neo4jProducerTest {
 	public void testNullOperationFails() throws Exception {
 		producer.process(exchange);
 	}
+
+	@Test
+	public void testRemoveNodeBasicBody() throws Exception {
+
+		Node node = mock(Node.class);
+		when(node.getId()).thenReturn(14L);
+
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_NODE);
+		when(msg.getBody()).thenReturn(node);
+
+		producer.process(exchange);
+		verify(template).delete(node);
+	}
+
+	@Test
+	public void testRemoveNodeById() throws Exception {
+
+		Node node = mock(Node.class);
+		when(template.getNode(44L)).thenReturn(node);
+
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_NODE);
+		when(msg.getBody()).thenReturn(44L);
+
+		producer.process(exchange);
+		verify(template).delete(node);
+	}
+
+	@Test
+	public void testRemoveRelationshipByBasic() throws Exception {
+
+		Relationship r = mock(Relationship.class);
+
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_RELATIONSHIP);
+		when(msg.getBody()).thenReturn(r);
+
+		producer.process(exchange);
+		verify(template).delete(r);
+	}
+
+	@Test
+	public void testRemoveRelationshipById() throws Exception {
+
+		Relationship r = mock(Relationship.class);
+		when(template.getRelationship(51L)).thenReturn(r);
+
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_RELATIONSHIP);
+		when(msg.getBody()).thenReturn(51L);
+
+		producer.process(exchange);
+		verify(template).delete(r);
+	}
+
+	@Test
+	public void testRemoveRelationshipBySpringData() throws Exception {
+
+		Object start = new Object();
+		Object end = new Object();
+		Class entityClass = String.class;
+		String type = "friendswith";
+
+		SpringDataRelationship spring = new SpringDataRelationship(start, end, entityClass, type, true);
+
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_RELATIONSHIP);
+		when(msg.getBody()).thenReturn(spring);
+
+		producer.process(exchange);
+		verify(template).deleteRelationshipBetween(start, end, type);
+	}
+
+	@Test(expected = Neo4jException.class)
+	public void testUnsupportedBodyForCreateNode() throws Exception {
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.CREATE_NODE);
+		when(msg.getBody()).thenReturn(new Object());
+		producer.process(exchange);
+	}
+
+	@Test(expected = Neo4jException.class)
+	public void testUnsupportedBodyForCreateRelationship() throws Exception {
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.CREATE_RELATIONSHIP);
+		when(msg.getBody()).thenReturn(new Object());
+		producer.process(exchange);
+	}
+
+	@Test(expected = Neo4jException.class)
+	public void testUnsupportedBodyForDeleteNode() throws Exception {
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_NODE);
+		when(msg.getBody()).thenReturn(new Object());
+		producer.process(exchange);
+	}
+
+	@Test(expected = Neo4jException.class)
+	public void testUnsupportedBodyForDeleteRelationship() throws Exception {
+		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_RELATIONSHIP);
+		when(msg.getBody()).thenReturn(new Object());
+		producer.process(exchange);
+	}
 }

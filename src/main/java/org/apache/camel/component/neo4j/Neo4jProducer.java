@@ -107,8 +107,8 @@ public class Neo4jProducer extends DefaultProducer {
 			template.delete(node);
 		} else if (body instanceof Node) {
 			template.delete(body);
-		}
-		throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
+		} else
+			throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
 	}
 
 	void removeRelationship(Object body) {
@@ -121,7 +121,7 @@ public class Neo4jProducer extends DefaultProducer {
 		} else if (body instanceof SpringDataRelationship) {
 			SpringDataRelationship r = (SpringDataRelationship) body;
 			template.deleteRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType());
-		}
-		throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
+		} else
+			throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
 	}
 }

@@ -12,8 +12,6 @@
  */
 package org.apache.camel.component.neo4j;
 
-import java.net.URISyntaxException;
-
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
@@ -29,7 +27,7 @@ public class Neo4jEndpoint extends DefaultEndpoint {
 
 	private final GraphDatabaseService	graphDatabase;
 
-	public Neo4jEndpoint(String endpointUri, String remaining, Neo4jComponent component) throws URISyntaxException {
+	public Neo4jEndpoint(String endpointUri, String remaining, Neo4jComponent component) {
 		super(endpointUri, component);
 		graphDatabase = new SpringRestGraphDatabase(remaining);
 	}
