@@ -63,15 +63,17 @@ public class Neo4jProducer extends DefaultProducer {
 
 		if (body instanceof SpringDataRelationship) {
 			SpringDataRelationship r = (SpringDataRelationship) body;
-			return template.createRelationshipBetween(r.getStart(),
+			Object rr = template.createRelationshipBetween(r.getStart(),
 					r.getEnd(),
 					r.getRelationshipEntityClass(),
 					r.getRelationshipType(),
 					r.isAllowDuplicates());
+			return (Relationship) rr;
+
 		} else if (body instanceof BasicRelationship) {
 			BasicRelationship r = (BasicRelationship) body;
-			return template.createRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType(), r.getProperties());
-
+			Object rr = template.createRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType(), r.getProperties());
+			return (Relationship) rr;
 		}
 		throw new Neo4jException("Unsupported body type for create relationship [" + body == null ? "null" : body.getClass() + "]");
 	}

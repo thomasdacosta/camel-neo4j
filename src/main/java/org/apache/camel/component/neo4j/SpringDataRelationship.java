@@ -16,15 +16,15 @@ package org.apache.camel.component.neo4j;
  * @author Stephen K Samuel
  * 
  */
-public class SpringDataRelationship {
+public class SpringDataRelationship<R> {
 
 	private final Object	start;
 	private final Object	end;
-	private final Class	relationshipEntityClass;
+	private final Class<R>	relationshipEntityClass;
 	private final String	relationshipType;
 	private final boolean	allowDuplicates;
 
-	public SpringDataRelationship(Object start, Object end, Class relationshipEntityClass, String relationshipType,
+	public SpringDataRelationship(Object start, Object end, Class<R> relationshipEntityClass, String relationshipType,
 			boolean allowDuplicates) {
 		this.start = start;
 		this.end = end;
@@ -37,7 +37,7 @@ public class SpringDataRelationship {
 		return end;
 	}
 
-	public Class getRelationshipEntityClass() {
+	public Class<R> getRelationshipEntityClass() {
 		return relationshipEntityClass;
 	}
 
