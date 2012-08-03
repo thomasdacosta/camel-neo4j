@@ -1,8 +1,8 @@
-/*
- * Copyright 2012 Stephen Keith Samuel
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -19,6 +19,10 @@ import org.apache.camel.impl.DefaultEndpoint;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.springframework.data.neo4j.rest.SpringRestGraphDatabase;
 
+/**
+ * @author Stephen K Samuel
+ * 
+ */
 public class Neo4jEndpoint extends DefaultEndpoint {
 
 	public static final String		HEADER_OPERATION		= "Neo4jOperation";

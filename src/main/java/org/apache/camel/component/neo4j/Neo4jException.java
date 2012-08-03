@@ -1,8 +1,8 @@
-/*
- * Copyright 2012 Stephen Keith Samuel
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -13,7 +13,7 @@
 package org.apache.camel.component.neo4j;
 
 /**
- * @author Stephen K Samuel samspade79@gmail.com 29 Jul 2012 13:58:09
+ * @author Stephen K Samuel
  * 
  */
 public class Neo4jException extends RuntimeException {

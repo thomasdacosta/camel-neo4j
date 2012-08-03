@@ -1,8 +1,8 @@
-/*
- * Copyright 2012 Stephen Keith Samuel
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -10,7 +10,6 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.apache.camel.component.neo4j;
 
 import java.util.Map;
@@ -24,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.core.GraphDatabase;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 
+/**
+ * @author Stephen K Samuel
+ * 
+ */
 public class Neo4jProducer extends DefaultProducer {
 
 	private static final Logger	logger	= LoggerFactory.getLogger(Neo4jProducer.class);
