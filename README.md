@@ -1,6 +1,9 @@
 camel-neo4j
 ========
 
+*This component is now included in the [camel extra](http://camel.apache.org/spring-neo4j.html) distribution from version 2.10+*
+
+
 The camel-neo4j component allows you to treat Neo4j as a camel producer endpoint. This means you can use this component in to() calls but not from() calls. This component is backed by the Spring Data Neo4j Library.
 
 * As a producer, can create or remove nodes, and create or remove relationships.
