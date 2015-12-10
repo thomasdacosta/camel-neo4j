@@ -24,7 +24,11 @@ Then you need to set a header on each message, one of the following enum types
 
 	CREATE_RELATIONSHIP,
 
-	REMOVE_RELATIONSHIP`
+	REMOVE_RELATIONSHIP,
+
+	TRAVERSE,
+
+	QUERY`
 
 Eg,
 
@@ -42,7 +46,7 @@ For REMOVE_NODE:
 * Long or Integer - remove node using the body as the id
 * neo4j Node instance - remove the node specified by that instance
 
- For CREATE_RELATIONSHIP:
+For CREATE_RELATIONSHIP:
 
 * SpringDataRelationship - create relationship specified by any @NodeEntity annoted Spring entities.
 * BasicRelationship - create relationship specified by the neo4j node types
@@ -52,6 +56,16 @@ For REMOVE_RELATIONSHIP:
 * Long or Integer - remove relationship using the body as the id
 * SpringDataRelationship - remove relationship specified by the @NodeEntity annoted Spring entities.
 * BasicRelationship - remove relationship specified by the neo4j node types
+
+For TRAVERSE:
+
+* null body - throws Neo4jException
+* camel-neo4j Traverse dto instance - traverse node using TraversalDescription
+
+From QUERY:
+
+* null body - throws Neo4jException
+* camel-neo4j Query dto instance - query using String statement and parameters Map
 
 Tests
 =====

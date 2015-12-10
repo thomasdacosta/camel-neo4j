@@ -1,26 +1,31 @@
 package org.apache.camel.component.neo4j;
 
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.UUID;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.component.neo4j.dto.Query;
+import org.apache.camel.component.neo4j.dto.Traverse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.springframework.data.neo4j.conversion.Result;
 import org.springframework.data.neo4j.support.DelegatingGraphDatabase;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  * @author Stephen K Samuel samspade79@gmail.com
@@ -48,7 +53,7 @@ public class Neo4jProducerTest {
 	public void before() throws IOException {
 		initMocks(this);
 		when(exchange.getIn()).thenReturn(msg);
-		db = new EmbeddedGraphDatabase(getRandomStore());
+		db = (EmbeddedGraphDatabase) new GraphDatabaseFactory().newEmbeddedDatabase(getRandomStore());
 		producer = new Neo4jProducer(endpoint, new DelegatingGraphDatabase(db), template);
 	}
 
@@ -204,6 +209,7 @@ public class Neo4jProducerTest {
 
 	@Test(expected = Neo4jException.class)
 	public void testUnsupportedBodyForCreateNode() throws Exception {
+
 		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.CREATE_NODE);
 		when(msg.getBody()).thenReturn(new Object());
 		producer.process(exchange);
@@ -211,6 +217,7 @@ public class Neo4jProducerTest {
 
 	@Test(expected = Neo4jException.class)
 	public void testUnsupportedBodyForCreateRelationship() throws Exception {
+
 		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.CREATE_RELATIONSHIP);
 		when(msg.getBody()).thenReturn(new Object());
 		producer.process(exchange);
@@ -218,6 +225,7 @@ public class Neo4jProducerTest {
 
 	@Test(expected = Neo4jException.class)
 	public void testUnsupportedBodyForDeleteNode() throws Exception {
+
 		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_NODE);
 		when(msg.getBody()).thenReturn(new Object());
 		producer.process(exchange);
@@ -225,8 +233,70 @@ public class Neo4jProducerTest {
 
 	@Test(expected = Neo4jException.class)
 	public void testUnsupportedBodyForDeleteRelationship() throws Exception {
+
 		when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.REMOVE_RELATIONSHIP);
 		when(msg.getBody()).thenReturn(new Object());
 		producer.process(exchange);
 	}
+
+    @Test
+    public void testTraverse() throws Exception {
+
+        when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.TRAVERSE);
+        Node node = mock(Node.class);
+        when(node.getId()).thenReturn(55L);
+        TraversalDescription traversalDescription = mock(TraversalDescription.class);
+        when(msg.getBody()).thenReturn(new Traverse(node, traversalDescription));
+        Result<Path> result = mock(Result.class);
+        when(template.traverse(node, traversalDescription)).thenReturn(result);
+        producer.process(exchange);
+        verify(template).traverse(node, traversalDescription);
+        verify(msg).setHeader(Neo4jEndpoint.HEADER_TRAVERSE_RESULT, result);
+    }
+
+    @Test(expected = Neo4jException.class)
+    public void testTraverseUnsupportedBody() throws Exception {
+
+        when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.TRAVERSE);
+        when(msg.getBody()).thenReturn(new Object());
+        producer.process(exchange);
+    }
+
+    @Test(expected = Neo4jException.class)
+    public void testTraverseNullBody() throws Exception {
+
+        when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.TRAVERSE);
+        when(msg.getBody()).thenReturn(null);
+        producer.process(exchange);
+    }
+
+    @Test
+    public void testQuery() throws Exception {
+
+        when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.QUERY);
+        String statement = "";
+        Map<String, Object> map = mock(HashMap.class);
+        when(msg.getBody()).thenReturn(new Query(statement, map));
+        Result<Map<String, Object>> result = mock(Result.class);
+        when(template.query(anyString(), anyMap())).thenReturn(result);
+        producer.process(exchange);
+        verify(template).query(anyString(), anyMap());
+        verify(msg).setHeader(Neo4jEndpoint.HEADER_QUERY_RESULT, result);
+    }
+
+    @Test(expected = Neo4jException.class)
+    public void testQueryUnsupportedBody() throws Exception {
+
+        when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.QUERY);
+        when(msg.getBody()).thenReturn(new Object());
+        producer.process(exchange);
+    }
+
+    @Test(expected = Neo4jException.class)
+    public void testQueryNullBody() throws Exception {
+
+        when(msg.getHeader(Neo4jEndpoint.HEADER_OPERATION)).thenReturn(Neo4jOperation.QUERY);
+        when(msg.getBody()).thenReturn(null);
+        producer.process(exchange);
+    }
 }

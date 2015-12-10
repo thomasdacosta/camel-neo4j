@@ -36,8 +36,7 @@ public class Neo4jComponent extends DefaultComponent {
 
 	@Override
 	protected Neo4jEndpoint createEndpoint(String uri, String remaining, Map<String, Object> params) throws Exception {
-		Neo4jEndpoint e = new Neo4jEndpoint(uri, remaining, this);
-		setProperties(e, params);
+		Neo4jEndpoint e = new Neo4jEndpoint(uri, remaining, this, params);
 		logger.info("Created Neo4j Endpoint [{}]", e);
 		return e;
 	}

@@ -12,16 +12,20 @@
  */
 package org.apache.camel.component.neo4j;
 
-import java.util.Map;
-
 import org.apache.camel.Exchange;
+import org.apache.camel.component.neo4j.dto.Query;
+import org.apache.camel.component.neo4j.dto.Traverse;
 import org.apache.camel.impl.DefaultProducer;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.neo4j.conversion.Result;
 import org.springframework.data.neo4j.core.GraphDatabase;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
+
+import java.util.Map;
 
 /**
  * @author Stephen K Samuel
@@ -35,7 +39,7 @@ public class Neo4jProducer extends DefaultProducer {
 
 	private final GraphDatabase	graphDatabase;
 
-	private final Neo4jTemplate	template;
+	private final Neo4jTemplate template;
 
 	public Neo4jProducer(Neo4jEndpoint endpoint, GraphDatabase graphDatabase) {
 		super(endpoint);
@@ -51,7 +55,7 @@ public class Neo4jProducer extends DefaultProducer {
 		this.template = template;
 	}
 
-	Node createNode(Object body) {
+	private Node createNode(Object body) {
 		if (body == null)
 			return template.createNode();
 		else if (body instanceof Map)
@@ -59,7 +63,7 @@ public class Neo4jProducer extends DefaultProducer {
 		throw new Neo4jException("Unsupported body type for create node [" + body.getClass() + "]");
 	}
 
-	Relationship createRelationship(Object body) {
+	private Relationship createRelationship(Object body) {
 
 		if (body instanceof SpringDataRelationship) {
 			SpringDataRelationship r = (SpringDataRelationship) body;
@@ -75,7 +79,7 @@ public class Neo4jProducer extends DefaultProducer {
 			Object rr = template.createRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType(), r.getProperties());
 			return (Relationship) rr;
 		}
-		throw new Neo4jException("Unsupported body type for create relationship [" + body == null ? "null" : body.getClass() + "]");
+		throw new Neo4jException("Unsupported body type for create relationship [" + (body == null ? "null" : body.getClass()) + "]");
 	}
 
 	@Override
@@ -102,10 +106,20 @@ public class Neo4jProducer extends DefaultProducer {
 		case REMOVE_RELATIONSHIP:
 			removeRelationship(body);
 			break;
+        case TRAVERSE:
+            Result<Path> rp = traverse(body);
+            logger.debug("Traverse results [{}]", rp);
+            exchange.getIn().setHeader(Neo4jEndpoint.HEADER_TRAVERSE_RESULT, rp);
+            break;
+        case QUERY:
+            Result<Map<String, Object>> rm = query(body);
+            logger.debug("Query results [{}]", rm);
+            exchange.getIn().setHeader(Neo4jEndpoint.HEADER_QUERY_RESULT, rm);
+            break;
 		}
 	}
 
-	void removeNode(Object body) {
+	private void removeNode(Object body) {
 		if (body instanceof Number) {
 			logger.debug("Deleting node by id [" + body + "]");
 			Node node = template.getNode(((Number) body).longValue());
@@ -113,10 +127,10 @@ public class Neo4jProducer extends DefaultProducer {
 		} else if (body instanceof Node) {
 			template.delete(body);
 		} else
-			throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
+			throw new Neo4jException("Unsupported body type for remove node [" + (body == null ? "null" : body.getClass()) + "]");
 	}
 
-	void removeRelationship(Object body) {
+	private void removeRelationship(Object body) {
 		if (body instanceof Number) {
 			logger.debug("Deleting relationship by id [" + body + "]");
 			Relationship r = template.getRelationship(((Number) body).longValue());
@@ -127,6 +141,23 @@ public class Neo4jProducer extends DefaultProducer {
 			SpringDataRelationship r = (SpringDataRelationship) body;
 			template.deleteRelationshipBetween(r.getStart(), r.getEnd(), r.getRelationshipType());
 		} else
-			throw new Neo4jException("Unsupported body type for remove node [" + body == null ? "null" : body.getClass() + "]");
+			throw new Neo4jException("Unsupported body type for remove node [" + (body == null ? "null" : body.getClass()) + "]");
 	}
+
+    private Result<Path> traverse(Object body) {
+        if (body instanceof Traverse) {
+            Traverse traverse = (Traverse) body;
+            return template.traverse(traverse.getNode(), traverse.getTraversalDescription());
+        }
+        throw new Neo4jException("Unsupported body type for traverse [" + (body == null ? "null" : body.getClass()) + "]");
+
+    }
+
+    private Result<Map<String, Object>> query(Object body) {
+        if (body instanceof Query) {
+            Query query = (Query) body;
+            return template.query(query.getStatement(), query.getParams());
+        }
+        throw new Neo4jException("Unsupported body type for traverse [" + (body == null ? "null" : body.getClass()) + "]");
+    }
 }

@@ -24,6 +24,10 @@ public enum Neo4jOperation {
 
 	CREATE_RELATIONSHIP,
 
-	REMOVE_RELATIONSHIP
+	REMOVE_RELATIONSHIP,
+
+    TRAVERSE,
+
+    QUERY
 
 }
