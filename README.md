@@ -18,22 +18,22 @@ You can use neo4j as an endpoint with the following URI.
 
 The available options are
 
-* user - username to Neo4j
-* password - password to Neo4j
+`* user - username to Neo4j
+* password - password to Neo4j`
 
 Then you need to set a header on each message, one of the following enum types
 
-    `CREATE_NODE,
+`CREATE_NODE,
 
-	REMOVE_NODE,
+REMOVE_NODE,
 
-	CREATE_RELATIONSHIP,
+CREATE_RELATIONSHIP,
 
-	REMOVE_RELATIONSHIP,
+REMOVE_RELATIONSHIP,
 
-	TRAVERSE,
+TRAVERSE,
 
-	QUERY`
+QUERY`
 
 Eg,
 
