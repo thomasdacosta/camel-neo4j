@@ -14,11 +14,16 @@ How to Use
 ==========
 
 You can use neo4j as an endpoint with the following URI.
-`neo4j:http://hostname[:port]/database`
+`neo4j:http://hostname[:port]/database[?options]`
+
+The available options are
+
+* user - username to Neo4j
+* password - password to Neo4j
 
 Then you need to set a header on each message, one of the following enum types
 
-`	CREATE_NODE,
+    `CREATE_NODE,
 
 	REMOVE_NODE,
 

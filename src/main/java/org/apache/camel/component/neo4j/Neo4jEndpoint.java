@@ -36,6 +36,9 @@ import java.util.Map;
  */
 public class Neo4jEndpoint extends DefaultEndpoint {
 
+    private static final String USER = "user";
+    private static final String PASSWORD = "password";
+
     public static final String HEADER_OPERATION = "Neo4jOperation";
     public static final String HEADER_NODE_ID = "Neo4jNodeId";
     public static final String HEADER_RELATIONSHIP_ID = "Neo4jRelationshipId";
@@ -48,8 +51,8 @@ public class Neo4jEndpoint extends DefaultEndpoint {
         super(endpointUri.split("\\?")[0], component);
 
         if (!params.isEmpty()) {
-            if (params.containsKey("user") && params.containsKey("password"))
-                graphDatabase = new SpringCypherRestGraphDatabase(remaining, params.get("user").toString(), params.get("password").toString());
+            if (params.containsKey(USER) && params.containsKey(PASSWORD))
+                graphDatabase = new SpringCypherRestGraphDatabase(remaining, params.get(USER).toString(), params.get(PASSWORD).toString());
             else
                 throw new InvalidParameterException("The only valid parameters are: [user,password].");
         } else
